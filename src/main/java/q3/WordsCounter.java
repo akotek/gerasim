@@ -4,17 +4,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 public class WordsCounter {
 
     // ===========================================================================
 
-    private ConcurrentHashMap<String, LongAdder> counts = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, AtomicLong> counts = new ConcurrentHashMap<>();
     private final int POOL_SIZE = 20;
     ExecutorService pool = Executors.newFixedThreadPool(POOL_SIZE);
 
@@ -26,8 +24,8 @@ public class WordsCounter {
             stream
                     .map(line -> line.trim().split("\\s+"))
                     .flatMap(arr -> Stream.of(arr))
-                    .forEach(s -> counts.computeIfAbsent(s.toLowerCase(), k -> new LongAdder())
-                                        .increment());
+                    .forEach(s -> counts.computeIfAbsent(s.toLowerCase(), k -> new AtomicLong())
+                                        .getAndIncrement());
         }
     }
 
@@ -52,14 +50,15 @@ public class WordsCounter {
     // ===========================================================================
     // API
 
-    public void load(String... files) {
+    public void load(String... files) throws InterruptedException {
         Arrays.asList(files).forEach(s -> pool.execute(new Task(s)));
         pool.shutdown();
+        pool.awaitTermination(30, TimeUnit.SECONDS);
     }
 
     public void displayStatus() {
-        System.out.println(counts.toString());
-        System.out.println("** total: " + counts.values().stream().mapToInt(LongAdder::intValue).sum());
+        counts.forEach((k, v) -> System.out.println(k + " " + v));
+        System.out.print("** total: " + counts.values().stream().mapToInt(AtomicLong::intValue).sum());
     }
 
     // ===========================================================================
@@ -67,7 +66,6 @@ public class WordsCounter {
     public static void main(String[] args) throws InterruptedException {
         WordsCounter wc = new WordsCounter();
         wc.load(args);
-        Thread.sleep(4000); // replace with Threads.join()
         wc.displayStatus();
     }
 }

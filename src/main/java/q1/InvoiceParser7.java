@@ -49,7 +49,7 @@ public class InvoiceParser7 implements InvoiceParser {
         if (in == null || !(new File(in).isFile())){
             throw new IllegalArgumentException("Invalid input");
         }
-        ArrayList<String> lines = new ArrayList<>();
+        List<String> lines = new ArrayList<>();
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(out))) {
             try (BufferedReader br = new BufferedReader(new FileReader(in))) {
                 int n = 0;

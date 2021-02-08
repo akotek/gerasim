@@ -17,15 +17,13 @@ public class MyClass {
         this.strings = strings;
     }
 
-//    1. for current use-case (removeString) - no need to override
-//    2. no need to use instanceof
-//    3. no need to downcast
-//    public boolean equals(Object obj) {
-//        if (obj instanceof MyClass) {
-//            return name.equals(((MyClass) obj).name);
-//        }
-//        return false;
-//    }
+    // looks OK, equals by the string.name, usage of instanceOf is legitimate here
+    public boolean equals(Object obj) {
+        if (obj instanceof MyClass) {
+            return name.equals(((MyClass) obj).name);
+        }
+        return false;
+    }
 
     public String toString() {
         // 1. use StringBuilder for efficiency:

@@ -10,9 +10,9 @@ public class InvoiceParser7 implements InvoiceParser {
 
     // ===========================================================================
 
-    private final int ROW_LEN = 3;
-    private final int COL_LEN = 27;
-    private final int LINES_LEN = 4;
+    private final int COL_IN_DIGIT = 3;
+    private final int COL_IN_INVOICE = 27;
+    private final int INVOICE_LINES_LEN = 4;
 
     private final String[] DIGITS = Digits.SEVEN;
 
@@ -27,13 +27,13 @@ public class InvoiceParser7 implements InvoiceParser {
         }
     }
 
-    private String parseChunk(List<String> lines) {
+    private String parseInvoice(List<String> lines) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < COL_LEN - ROW_LEN + 1; i += ROW_LEN) {
+        for (int i = 0; i < COL_IN_INVOICE - COL_IN_DIGIT + 1; i += COL_IN_DIGIT) {
             String digit =
-                    lines.get(0).substring(i, i + ROW_LEN)
-                            .concat(lines.get(1).substring(i, i + ROW_LEN))
-                            .concat(lines.get(2).substring(i, i + ROW_LEN));
+                    lines.get(0).substring(i, i + COL_IN_DIGIT)
+                            .concat(lines.get(1).substring(i, i + COL_IN_DIGIT))
+                            .concat(lines.get(2).substring(i, i + COL_IN_DIGIT));
             sb.append(digitToNum.getOrDefault(digit, '?'));
         }
         String res = sb.toString();
@@ -56,8 +56,8 @@ public class InvoiceParser7 implements InvoiceParser {
                 String line;
                 while ((line = br.readLine()) != null) {
                     n += 1;
-                    if (n % LINES_LEN == 0) {
-                        String s = parseChunk(lines);
+                    if (n % INVOICE_LINES_LEN == 0) {
+                        String s = parseInvoice(lines);
                         bw.write(s + "\n");
                         lines = new ArrayList<>();
                         continue;
